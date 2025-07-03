@@ -69,4 +69,72 @@ card.addEventListener('touchend', () => {
   targetY = 0;
   animating = false;
   animate();
+});
+
+// ATM Card 3D effect
+const atmCard = document.querySelector('.atm-card');
+let atmTargetX = 0, atmTargetY = 0;
+let atmCurrentX = 0, atmCurrentY = 0;
+let atmIsFlipped = false;
+let atmAnimating = false;
+const atmMaxAngle = 15;
+
+function atmMapRange(value, inMin, inMax, outMin, outMax) {
+  return ((value - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+}
+
+function animateAtm() {
+  atmCurrentX += (atmTargetX - atmCurrentX) * 0.15;
+  atmCurrentY += (atmTargetY - atmCurrentY) * 0.15;
+  let transform = `rotateX(${-atmCurrentY}deg) rotateY(${atmCurrentX}deg)`;
+  if (atmIsFlipped) transform += ' rotateY(180deg)';
+  atmCard.style.transform = transform;
+  if (Math.abs(atmCurrentX - atmTargetX) > 0.1 || Math.abs(atmCurrentY - atmTargetY) > 0.1 || atmAnimating) {
+    requestAnimationFrame(animateAtm);
+  }
+}
+
+atmCard.addEventListener('mousemove', (e) => {
+  const rect = atmCard.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  atmTargetX = atmMapRange(x, 0, rect.width, -atmMaxAngle, atmMaxAngle);
+  atmTargetY = atmMapRange(y, 0, rect.height, -atmMaxAngle, atmMaxAngle);
+  atmAnimating = false;
+  animateAtm();
+});
+
+atmCard.addEventListener('mouseleave', () => {
+  atmTargetX = 0;
+  atmTargetY = 0;
+  atmAnimating = false;
+  animateAtm();
+});
+
+atmCard.addEventListener('mouseenter', () => {
+  atmAnimating = false;
+});
+
+atmCard.addEventListener('click', () => {
+  atmIsFlipped = !atmIsFlipped;
+  atmAnimating = true;
+  animateAtm();
+});
+
+// Touch support for mobile
+atmCard.addEventListener('touchmove', (e) => {
+  const rect = atmCard.getBoundingClientRect();
+  const touch = e.touches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+  atmTargetX = atmMapRange(x, 0, rect.width, -atmMaxAngle, atmMaxAngle);
+  atmTargetY = atmMapRange(y, 0, rect.height, -atmMaxAngle, atmMaxAngle);
+  atmAnimating = false;
+  animateAtm();
+});
+atmCard.addEventListener('touchend', () => {
+  atmTargetX = 0;
+  atmTargetY = 0;
+  atmAnimating = false;
+  animateAtm();
 }); 
